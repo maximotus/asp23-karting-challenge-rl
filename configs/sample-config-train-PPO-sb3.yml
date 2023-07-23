@@ -1,0 +1,33 @@
+mode: train # (train / eval)
+logger:
+  level: 20 # CRITICAL = 50, ERROR = 40, WARNING = 30, INFO = 20, DEBUG = 10, NOTSET = 0
+  format: "%(asctime)s - %(levelname)s - %(module)s - %(message)s"
+experiment_path: ./experiments/experiment-demo
+
+# define environment
+environment:
+  # modifications of track
+  tracks_base_path: ./builds/training/KartingChallenge
+  seed: 42
+  time_scale: 10 # <= 10 due to physics engine of unity
+
+# define the rl agent (using the above environment)
+agent:
+  train_rollouts: 300 # (actually this refers to "iterations" in sb3 terminology) the number of total timesteps is calculated as follows: # rollouts * # n_steps
+  eval_rollouts: 10
+  save_model_interval: 1 # (in rollouts / iterations) refers to saving .pt and .onnx files of the model(s)
+  log_interval: 1 # (in rollouts / iterations) use always 1 here if you want to compare the results to our PPO implementation, also saves the stats (because of sb3 implementation)
+  sb3_logger_config: [ "stdout", "csv", "json", "log"] # format options are: "stdout", "csv", "log", "tensorboard", "json"
+  
+  # define model with its specific parameters
+  model:
+    name: PPO-sb3 # compare https://stable-baselines3.readthedocs.io/en/master/modules/a2c.html
+    device: auto # (cuda / cpu / auto)
+    parameters:
+      policy: MlpPolicy
+      learning_rate: 0.0003 # reference value from sb3
+      gamma: 0.99 # reference value from sb3
+      n_steps: 4096 # max number of timesteps of an episode (reference value from tutors and sb3)
+      n_epochs: 20 # number of backward passes per update (reference value from sb3)
+      clip_range: 0.4 # clipping of the policy / actor loss (reference value from sb3)
+      pretrained_path: # empty if start from scratch

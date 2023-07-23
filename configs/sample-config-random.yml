@@ -1,0 +1,27 @@
+mode: train # (train)
+logger:
+  level: 20 # CRITICAL = 50, ERROR = 40, WARNING = 30, INFO = 20, DEBUG = 10, NOTSET = 0
+  format: "%(asctime)s - %(levelname)s - %(module)s - %(message)s"
+experiment_path: ./experiments/experiment-demo
+
+# define environment
+environment:
+  # modifications of track
+  tracks_base_path: ./builds/training/KartingChallenge
+  seed: 42
+  time_scale: 10 # <= 10 due to physics engine of unity
+
+# define the rl agent (using the above environment)
+agent:
+  train_rollouts: 10 # WARNING: usage of more than 10 rollouts with random model does not make sense
+  log_interval: 10 # (in rollouts) only refers to logging to the console
+  
+  # define model with its specific parameters
+  model:
+    name: random 
+    device: auto # (cuda / cpu / auto)
+    parameters:
+      additional_learnable_actions: ["acceleration","breaking"] # "steering" is always learned, "acceleration" or "breaking" can be additionally learned (empty list or None if only "steering is the goal")
+      policy: MlpPolicy
+      n_steps: 4096 # max number of timesteps of an episode (reference value from tutors and sb3)
+     
